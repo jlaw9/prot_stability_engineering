@@ -32,7 +32,8 @@ def get_seq_embeddings(model, seqs, repr_layer=33, batch_size=16):
             out = out['representations'][repr_layer].detach().to('cpu').numpy()
 
             for i in range(len(batch)):
-                representations += [out[i, 1:len(batch[i]) + 1].mean(0).astype(np.float16)]
+                seq_idx = (batch_idx * batch_size) + i
+                representations += [out[i, 1:len(seqs[seq_idx]) + 1].mean(0).astype(np.float16)]
 
             if batch_idx == 0 or batch_idx % int(len(batch_dataloader) / 20.0) == 0:
                 # keep track of how much memory this script is using
