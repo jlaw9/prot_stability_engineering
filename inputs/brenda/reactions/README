@@ -1,0 +1,5 @@
+2023-08-31 JL: `ligand_inchi.csv` file
+- Search "*" in ligands and select "use * as joker"
+- select "inchi" and deselect "EC Number", "Role", and "Reference"
+- Download all results as CSV
+
