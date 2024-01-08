@@ -1,3 +1,4 @@
+from pathlib import Path
 import argparse
 import os
 import pandas as pd
@@ -60,12 +61,29 @@ if __name__ == "__main__":
 
     aa_checker = re.compile('^[acdefghiklmnpqrstvwy]*$', re.I)
 
-    out_dir = "/projects/robustmicrob/jlaw/inputs/species/bacdive/"
-    seq_file = f"{out_dir}/bacdive_clustered50_seqs.csv.gz"
+    #out_dir = "/projects/robustmicrob/jlaw/inputs/species/bacdive"
+    #seq_file = f"{out_dir}/bacdive_clustered50_seqs.csv.gz"
+    inputs_dir = Path("/projects/robustmicrob/jlaw/projects/prot_stability_engineering/inputs/")
+    out_dir = inputs_dir / "brenda/uniprot"
+    seq_file = out_dir / "idmapping_2023_09_22.tsv.gz"
     print(f"reading {seq_file}")
-    df = pd.read_csv(seq_file, index_col=0)
-    #df = df[['Organism (ID)', 'Sequence']]
-    df = df[['OGTmax', 'sequence']]
+    #df = pd.read_csv(seq_file, index_col=0)
+    df = pd.read_table(seq_file)
+    df = df.rename(columns={"From": "uniprot_id", "Sequence": "sequence"})
+    print(df.head(2))
+
+    seq_file = inputs_dir / "uniprot/uniprotkb_cc_bpcp_ph_dependence_2023_09_22.tsv.gz"
+    print(f"reading {seq_file}")
+    df2 = pd.read_table(seq_file)
+    df2 = df2.rename(columns={"Entry": "uniprot_id", "Sequence": "sequence"})
+    print(len(df2))
+    print(df2.head(2))
+     
+    df = pd.concat([df, df2])
+    df = df[['uniprot_id', 'sequence']].drop_duplicates()
+    #df = df[['From', 'Sequence']]
+    #df.columns = ['uniprot_id', 'sequence']
+    df = df.dropna(subset='sequence')
     print(len(df))
     print(df.head(2))
 
@@ -110,9 +128,9 @@ if __name__ == "__main__":
 
     # write the representations to file
     subset_str = "_" + str(args.subset_idx) if args.subset_idx is not None else ""
-    out_file = f"{out_dir}/embeddings/20230516_embeddings_{model_name}{subset_str}.npz"
+    out_file = f"{out_dir}/20230913_embeddings_{model_name}{subset_str}.npz"
     print(f"Writing embeddings to {out_file}")
     np.savez(out_file, representations)
 
-    df.to_csv(f"{out_dir}/embeddings/20230516_embeddings_seqs{subset_str}.csv")
+    df.to_csv(f"{out_dir}/20230913_embeddings_seqs{subset_str}.csv")
 
